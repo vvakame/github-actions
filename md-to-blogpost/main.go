@@ -85,7 +85,7 @@ func main() {
 		} else {
 			postDate = time.Now().In(loc).Format("2006-01-02")
 		}
-		*postPath = fmt.Sprintf("source/_posts/%s-%s.md", postDate, eventData.PullRequest.Head.Ref)
+		*postPath = fmt.Sprintf("source/_posts/%s-%s.md", postDate, *eventData.PullRequest.Head.Ref)
 	}
 	if *imagePath == "" {
 		loc, err := time.LoadLocation(*timezone)
@@ -98,16 +98,16 @@ func main() {
 		} else {
 			postDate = time.Now().In(loc).Format("2006-01-02")
 		}
-		*imagePath = fmt.Sprintf("source/images/%s-%s", postDate, eventData.PullRequest.Head.Ref)
+		*imagePath = fmt.Sprintf("source/images/%s-%s", postDate, *eventData.PullRequest.Head.Ref)
 	}
 	if *prBranch == "" {
-		*prBranch = fmt.Sprintf("from-pr-%d", eventData.Number)
+		*prBranch = fmt.Sprintf("from-pr-%d", *eventData.Number)
 	}
 	if *prTitle == "" {
-		*prTitle = fmt.Sprintf("blog post from '%s'", eventData.PullRequest.Title)
+		*prTitle = fmt.Sprintf("blog post from '%s'", *eventData.PullRequest.Title)
 	}
 	if *prBody == "" {
-		*prBody = fmt.Sprintf("from %s", eventData.PullRequest.HTMLURL)
+		*prBody = fmt.Sprintf("from %s", *eventData.PullRequest.HTMLURL)
 	}
 
 	client := github.NewClient(
