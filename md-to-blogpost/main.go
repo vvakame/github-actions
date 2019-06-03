@@ -214,49 +214,51 @@ func createContent(ctx context.Context, req *CreateContentReq) (map[string][]byt
 	var buf bytes.Buffer
 	tail := 0
 	for _, submatches := range re.FindAllSubmatchIndex(b, -1) {
-		alt := string(b[submatches[2]:submatches[3]])
-		imageURLStr := string(b[submatches[4]:submatches[5]])
-		imageURL, err := url.Parse(imageURLStr)
-		if err != nil {
-			return nil, err
-		}
-		shouldCopy := true
-		if imageURL.Host == "github.com" {
-			// GitHubのユーザアイコン部分はコピーせず直リンクにする
-			// https://github.com/vvakame.png?size=64 など
-			shouldCopy = false
-		}
-
-		imageBlob, err := getContent(imageURLStr)
-		if err != nil {
-			return nil, err
-		}
-		mimeType := http.DetectContentType(imageBlob)
-		ext := strings.TrimPrefix(mimeType, "image/")
-		fileName := fmt.Sprintf("%x.%s", md5.Sum(imageBlob), ext)
-
 		// before matching
 		buf.Write(b[tail:submatches[0]])
 		// ![
 		buf.Write(b[submatches[0]:submatches[2]])
 		// alt
-		buf.WriteString(alt)
+		buf.Write(b[submatches[2]:submatches[3]])
 		// ](
 		buf.Write(b[submatches[3]:submatches[4]])
 		// imageURL
-		if shouldCopy {
-			buf.WriteString(path.Join(baseImageURL, fileName))
-		} else {
-			buf.WriteString(imageURLStr)
+		{
+			imageURLStr := string(b[submatches[4]:submatches[5]])
+			imageURL, err := url.Parse(imageURLStr)
+			if err != nil {
+				return nil, err
+			}
+
+			var modifiedImageURL string
+			if imageURL.Host == "github.com" {
+				// GitHubのユーザアイコン部分はコピーせず直リンクにする
+				// https://github.com/vvakame.png?size=64 など
+				modifiedImageURL = imageURLStr
+
+			} else if imageBlob, err := getContent(imageURLStr); os.IsNotExist(err) {
+				// とりあえず無視する
+				log.Printf("%s is not exists", imageURLStr)
+				modifiedImageURL = imageURLStr
+
+			} else if err != nil {
+				return nil, err
+
+			} else {
+				mimeType := http.DetectContentType(imageBlob)
+				ext := strings.TrimPrefix(mimeType, "image/")
+				fileName := fmt.Sprintf("%x.%s", md5.Sum(imageBlob), ext)
+
+				modifiedImageURL = path.Join(baseImageURL, fileName)
+				contentMap[path.Join(imagePath, fileName)] = imageBlob
+			}
+
+			buf.WriteString(modifiedImageURL)
 		}
 		// )
 		buf.Write(b[submatches[5]:submatches[1]])
 
 		tail = submatches[1]
-
-		if shouldCopy {
-			contentMap[path.Join(imagePath, fileName)] = imageBlob
-		}
 	}
 	buf.Write(b[tail:])
 
