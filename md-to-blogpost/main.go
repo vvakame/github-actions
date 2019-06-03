@@ -38,7 +38,7 @@ var (
 	timezone      = kingpin.Flag("timezone", "timezone for blog post date").Default("UTC").String()
 	postPath      = kingpin.Flag("post_path", "blog post markdown path in repository. default value is source/_posts/YYYY-MM-DD-BranchName.md").String()
 	imagePath     = kingpin.Flag("image_path", "blog post image path in repository. default value is source/images/YYYY-MM-DD-BranchName").String()
-	baseImageURL  = kingpin.Flag("base_image_url", "base image url in blog site.").Default("/images").String()
+	baseImageURL  = kingpin.Flag("base_image_url", "base image url in blog site. default value is /images/YYYY-MM-DD-BranchName").String()
 
 	prBranch = kingpin.Flag("pr_branch", "name of pull request branch. default value is from-pr-PRNumber").String()
 	prTitle  = kingpin.Flag("pr_title", "title of pull request. default value is 'blog post from 'PRTitle''").String()
@@ -99,6 +99,19 @@ func main() {
 			postDate = time.Now().In(loc).Format("2006-01-02")
 		}
 		*imagePath = fmt.Sprintf("source/images/%s-%s", postDate, *eventData.PullRequest.Head.Ref)
+	}
+	if *baseImageURL == "" {
+		loc, err := time.LoadLocation(*timezone)
+		if err != nil {
+			log.Fatal(err)
+		}
+		var postDate string
+		if eventData.PullRequest != nil && eventData.PullRequest.MergedAt != nil && !eventData.PullRequest.MergedAt.IsZero() {
+			postDate = eventData.PullRequest.MergedAt.In(loc).Format("2006-01-02")
+		} else {
+			postDate = time.Now().In(loc).Format("2006-01-02")
+		}
+		*baseImageURL = fmt.Sprintf("/images/%s-%s", postDate, *eventData.PullRequest.Head.Ref)
 	}
 	if *prBranch == "" {
 		*prBranch = fmt.Sprintf("from-pr-%d", *eventData.Number)

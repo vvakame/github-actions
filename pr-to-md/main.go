@@ -6,11 +6,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"text/template"
 	"time"
 
 	githubv3 "github.com/google/go-github/v25/github"
@@ -33,6 +33,7 @@ var (
 	prNumber     = kingpin.Flag("pr_number", "number of pull request. default value is from GITHUB_EVENT_PATH.number .").Int()
 	templatePath = kingpin.Flag("template_path", "markdown template path. it uses with html/template").String()
 	outputPath   = kingpin.Arg("output_path", "result output path").Default("result.md").String()
+	timezone     = kingpin.Flag("timezone", "timezone for date").Default("UTC").String()
 )
 
 func main() {
@@ -68,6 +69,10 @@ func main() {
 	if *prNumber == 0 {
 		*prNumber = *eventData.Number
 	}
+	loc, err := time.LoadLocation(*timezone)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	src := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: *githubToken})
 	httpClient := oauth2.NewClient(ctx, src)
@@ -83,13 +88,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = generateMarkdown(ctx, f, *templatePath, resp)
+	err = generateMarkdown(ctx, f, *templatePath, resp, loc)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func generateMarkdown(ctx context.Context, w io.Writer, templatePath string, resp *PRInfo) error {
+func generateMarkdown(ctx context.Context, w io.Writer, templatePath string, resp *PRInfo, loc *time.Location) error {
 
 	var templateText string
 	if templatePath == "" {
@@ -119,8 +124,8 @@ func generateMarkdown(ctx context.Context, w io.Writer, templatePath string, res
 		Tags  []string `yaml:"tags"`
 	}{
 		Title: string(pr.Title),
-		Date:  time.Now().Format("2006-01-02 15:04:05"), // TODO Timezone
-		Tags:  []string{},                               // TODO
+		Date:  time.Now().In(loc).Format("2006-01-02 15:04:05"),
+		Tags:  []string{}, // TODO
 	})
 	if err != nil {
 		return err
@@ -135,7 +140,7 @@ func generateMarkdown(ctx context.Context, w io.Writer, templatePath string, res
 				return fmt.Sprintf("https://github.com/%s.png?size=64", login)
 			},
 			"date": func(t githubv4.DateTime) string {
-				return t.Format("2006-01-02 15:04:05") // TODO Timezone
+				return t.In(loc).Format("2006-01-02 15:04:05")
 			},
 			"isSamePrev": func(group string, value githubv4.String) bool {
 				if samePrevStock[group] == string(value) {
