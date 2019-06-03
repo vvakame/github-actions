@@ -80,7 +80,7 @@ func main() {
 			log.Fatal(err)
 		}
 		var postDate string
-		if eventData.PullRequest.MergedAt.IsZero() {
+		if eventData.PullRequest != nil && eventData.PullRequest.MergedAt != nil && !eventData.PullRequest.MergedAt.IsZero() {
 			postDate = eventData.PullRequest.MergedAt.In(loc).Format("2006-01-02")
 		} else {
 			postDate = time.Now().In(loc).Format("2006-01-02")
@@ -93,7 +93,7 @@ func main() {
 			log.Fatal(err)
 		}
 		var postDate string
-		if eventData.PullRequest.MergedAt.IsZero() {
+		if eventData.PullRequest != nil && eventData.PullRequest.MergedAt != nil && !eventData.PullRequest.MergedAt.IsZero() {
 			postDate = eventData.PullRequest.MergedAt.In(loc).Format("2006-01-02")
 		} else {
 			postDate = time.Now().In(loc).Format("2006-01-02")
