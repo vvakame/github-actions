@@ -2,11 +2,11 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 
 async function run() {
-  const labels = (core.getInput("labels") ?? "")
+  const labels = (core.getInput("target-labels") ?? "")
     .split(",")
     .map(s => s.trim())
     .filter(s => !!s);
-  core.debug(`labels: ${JSON.stringify(labels)}`);
+  core.debug(`target-labels: ${JSON.stringify(labels)}`);
 
   const githubToken = core.getInput("github-token");
   const octokit = new github.GitHub(githubToken);
@@ -34,7 +34,7 @@ async function run() {
       issue.data.labels.some(issueLabel => matchLabel(label, issueLabel))
     )
   ) {
-    core.debug(`some labels doesn't contains on issue labels.`);
+    core.debug(`some target labels doesn't contains on issue labels.`);
     return;
   }
 

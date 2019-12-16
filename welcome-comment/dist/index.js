@@ -7077,11 +7077,11 @@ const github = __importStar(__webpack_require__(469));
 function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const labels = (_a = core.getInput("labels"), (_a !== null && _a !== void 0 ? _a : ""))
+        const labels = (_a = core.getInput("target-labels"), (_a !== null && _a !== void 0 ? _a : ""))
             .split(",")
             .map(s => s.trim())
             .filter(s => !!s);
-        core.debug(`labels: ${JSON.stringify(labels)}`);
+        core.debug(`target-labels: ${JSON.stringify(labels)}`);
         const githubToken = core.getInput("github-token");
         const octokit = new github.GitHub(githubToken);
         const currentIssue = {
@@ -7103,7 +7103,7 @@ function run() {
             return false;
         }
         if (!labels.every(label => issue.data.labels.some(issueLabel => matchLabel(label, issueLabel)))) {
-            core.debug(`some labels doesn't contains on issue labels.`);
+            core.debug(`some target labels doesn't contains on issue labels.`);
             return;
         }
         octokit.issues.createComment(Object.assign(Object.assign({}, currentIssue), { body: core.getInput("message") }));

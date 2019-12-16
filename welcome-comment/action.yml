@@ -5,8 +5,8 @@ inputs:
   message:
     description: greeting message about posting to issue comment
     required: true
-  labels:
-    description: requires labels. divided by ','
+  target-labels:
+    description: required labels. divided by ','
     required: false
   github-token:
     description: github token for make issue comment
