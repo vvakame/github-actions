@@ -1,0 +1,16 @@
+name:   Welcome comment responder
+description: 'Provide a description here'
+author: vvakame
+inputs:
+  message:
+    description: greeting message about posting to issue comment
+    required: true
+  target-labels:
+    description: required labels. divided by ','
+    required: false
+  github-token:
+    description: github token for make issue comment
+    required: true
+runs:
+  using:  node12
+  main:   dist/index.js
