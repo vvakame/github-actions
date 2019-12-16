@@ -1,5 +1,5 @@
-name:   Welcome comment responder
-description: 'Provide a description here'
+name: Welcome comment responder
+description: comment welcome message to issue
 author: vvakame
 inputs:
   message:

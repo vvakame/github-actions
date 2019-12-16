@@ -1,0 +1,23 @@
+{
+  "name": "vote-checker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "fmt": "prettier --write **/*.ts",
+    "pack": "ncc build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/github": "^2.0.0"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.3"
+  }
+}

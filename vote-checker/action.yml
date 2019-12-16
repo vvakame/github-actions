@@ -1,0 +1,28 @@
+name: Vote checker
+description: vote checker
+author: vvakame
+inputs:
+  target-reactions:
+    description: count up target reactions. divided by ','. e.g. THUMBS_UP
+    default: THUMBS_UP
+    required: false
+  filter-labels:
+    description: label names to filter the issues. divided by ','
+    required: false
+  filter-states:
+    description: states to filter the issues. divided by ','
+    default: OPEN
+    required: false
+  voted-labels:
+    description: label names to over threshold voted. divided by ','
+    required: true
+  label-threshold:
+    description: threshold of add label vote count
+    default: "3"
+    required: false
+  github-token:
+    description: github token for add labels
+    required: true
+runs:
+  using:  node12
+  main:   dist/index.js
