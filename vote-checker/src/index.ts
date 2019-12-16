@@ -80,7 +80,7 @@ async function run() {
   resp!.repository.issues.nodes.forEach((issue: any) => {
     core.debug(`issue: ${issue.id}, ${issue.title}`);
     let count = 0;
-    issue.reactions.node.forEach((reaction: any) => {
+    issue.reactions.nodes.forEach((reaction: any) => {
       core.debug(`reaction: ${reaction.id}, ${reaction.content}`);
       if (targetReactions.includes(reaction.content)) {
         count++;

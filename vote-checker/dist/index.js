@@ -7144,7 +7144,7 @@ function run() {
         resp.repository.issues.nodes.forEach((issue) => {
             core.debug(`issue: ${issue.id}, ${issue.title}`);
             let count = 0;
-            issue.reactions.node.forEach((reaction) => {
+            issue.reactions.nodes.forEach((reaction) => {
                 core.debug(`reaction: ${reaction.id}, ${reaction.content}`);
                 if (targetReactions.includes(reaction.content)) {
                     count++;
