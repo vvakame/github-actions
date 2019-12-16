@@ -7075,7 +7075,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
 function run() {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     return __awaiter(this, void 0, void 0, function* () {
         const targetReactions = (_a = core.getInput("target-reactions"), (_a !== null && _a !== void 0 ? _a : ""))
             .split(",")
@@ -7099,6 +7099,12 @@ function run() {
         core.debug(`voted-labels: ${JSON.stringify(givenLabels)}`);
         const threshold = parseInt(core.getInput("label-threshold"), 10);
         core.debug(`label-threshold: ${JSON.stringify(threshold)}`);
+        const assignees = (_e = core.getInput("assignees"), (_e !== null && _e !== void 0 ? _e : ""))
+            .split(",")
+            .map(s => s.trim())
+            .filter(s => !!s);
+        core.debug(`assignees: ${JSON.stringify(assignees)}`);
+        const message = core.getInput("message");
         const githubToken = core.getInput("github-token");
         const octokit = new github.GitHub(githubToken);
         const { owner, repo } = github.context.issue;
@@ -7115,6 +7121,12 @@ function run() {
           nodes {
             id
             title
+            labels(first: 10) {
+              nodes {
+                id
+                name
+              }
+            }
             reactions(first: 10) {
               pageInfo {
                 hasNextPage
@@ -7143,6 +7155,13 @@ function run() {
         };
         resp.repository.issues.nodes.forEach((issue) => {
             core.debug(`issue: ${issue.id}, ${issue.title}`);
+            const givenLabelsExists = givenLabels.every(givenLabel => {
+                return issue.labels.nodes.some((label) => label.name === givenLabel);
+            });
+            if (givenLabelsExists) {
+                core.debug(`given labels are already exists`);
+                return;
+            }
             let count = 0;
             issue.reactions.nodes.forEach((reaction) => {
                 core.debug(`reaction: ${reaction.id}, ${reaction.content}`);
@@ -7153,6 +7172,12 @@ function run() {
             core.debug(`vote count: ${count}`);
             if (threshold <= count) {
                 octokit.issues.addLabels(Object.assign(Object.assign({}, currentIssue), { labels: givenLabels }));
+                if (assignees.length !== 0) {
+                    octokit.issues.addAssignees(Object.assign(Object.assign({}, currentIssue), { assignees }));
+                }
+                if (message) {
+                    octokit.issues.createComment(Object.assign(Object.assign({}, currentIssue), { body: message }));
+                }
             }
         });
     });

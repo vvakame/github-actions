@@ -29,6 +29,14 @@ async function run() {
   const threshold = parseInt(core.getInput("label-threshold"), 10);
   core.debug(`label-threshold: ${JSON.stringify(threshold)}`);
 
+  const assignees = (core.getInput("assignees") ?? "")
+    .split(",")
+    .map(s => s.trim())
+    .filter(s => !!s);
+  core.debug(`assignees: ${JSON.stringify(assignees)}`);
+
+  const message = core.getInput("message");
+
   const githubToken = core.getInput("github-token");
   const octokit = new github.GitHub(githubToken);
 
@@ -48,6 +56,12 @@ async function run() {
           nodes {
             id
             title
+            labels(first: 10) {
+              nodes {
+                id
+                name
+              }
+            }
             reactions(first: 10) {
               pageInfo {
                 hasNextPage
@@ -79,6 +93,14 @@ async function run() {
   };
   resp!.repository.issues.nodes.forEach((issue: any) => {
     core.debug(`issue: ${issue.id}, ${issue.title}`);
+    const givenLabelsExists = givenLabels.every(givenLabel => {
+      return issue.labels.nodes.some((label: any) => label.name === givenLabel);
+    });
+    if (givenLabelsExists) {
+      core.debug(`given labels are already exists`);
+      return;
+    }
+
     let count = 0;
     issue.reactions.nodes.forEach((reaction: any) => {
       core.debug(`reaction: ${reaction.id}, ${reaction.content}`);
@@ -92,6 +114,18 @@ async function run() {
         ...currentIssue,
         labels: givenLabels
       });
+      if (assignees.length !== 0) {
+        octokit.issues.addAssignees({
+          ...currentIssue,
+          assignees
+        });
+      }
+      if (message) {
+        octokit.issues.createComment({
+          ...currentIssue,
+          body: message
+        });
+      }
     }
   });
 }

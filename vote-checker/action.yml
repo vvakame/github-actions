@@ -20,6 +20,12 @@ inputs:
     description: threshold of add label vote count
     default: "3"
     required: false
+  assignees:
+    description: assignees account name
+    required: false
+  message:
+    description: vote count over threshold message
+    required: false
   github-token:
     description: github token for add labels
     required: true
