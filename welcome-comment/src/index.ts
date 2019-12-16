@@ -11,8 +11,12 @@ async function run() {
   const githubToken = core.getInput("github-token");
   const octokit = new github.GitHub(githubToken);
 
-  const { context } = github;
-  const issue = await octokit.issues.get(context.issue);
+  const currentIssue = {
+    owner: github.context.issue.owner,
+    repo: github.context.issue.repo,
+    issue_number: github.context.issue.number
+  };
+  const issue = await octokit.issues.get(currentIssue);
 
   function matchLabel(label: string, issueLabel: typeof issue.data.labels[0]) {
     if (`${issueLabel.id}` === label) {
@@ -35,7 +39,7 @@ async function run() {
   }
 
   octokit.issues.createComment({
-    ...context.issue,
+    ...currentIssue,
     body: core.getInput("message")
   });
 }

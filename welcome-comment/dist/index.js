@@ -7084,8 +7084,12 @@ function run() {
         core.debug(`labels: ${JSON.stringify(labels)}`);
         const githubToken = core.getInput("github-token");
         const octokit = new github.GitHub(githubToken);
-        const { context } = github;
-        const issue = yield octokit.issues.get(context.issue);
+        const currentIssue = {
+            owner: github.context.issue.owner,
+            repo: github.context.issue.repo,
+            issue_number: github.context.issue.number
+        };
+        const issue = yield octokit.issues.get(currentIssue);
         function matchLabel(label, issueLabel) {
             if (`${issueLabel.id}` === label) {
                 return true;
@@ -7102,7 +7106,7 @@ function run() {
             core.debug(`some labels doesn't contains on issue labels.`);
             return;
         }
-        octokit.issues.createComment(Object.assign(Object.assign({}, context.issue), { body: core.getInput("message") }));
+        octokit.issues.createComment(Object.assign(Object.assign({}, currentIssue), { body: core.getInput("message") }));
     });
 }
 run().catch(err => core.setFailed(err.message));
