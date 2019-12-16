@@ -18,14 +18,16 @@ async function run() {
     .split(",")
     .map(s => s.trim())
     .filter(s => !!s);
-  core.debug(`filter-states: ${JSON.stringify(labels)}`);
+  core.debug(`filter-states: ${JSON.stringify(state)}`);
 
   const givenLabels = (core.getInput("voted-labels") ?? "")
     .split(",")
     .map(s => s.trim())
     .filter(s => !!s);
-  core.debug(`voted-labels: ${JSON.stringify(labels)}`);
+  core.debug(`voted-labels: ${JSON.stringify(givenLabels)}`);
+
   const threshold = parseInt(core.getInput("label-threshold"), 10);
+  core.debug(`label-threshold: ${JSON.stringify(threshold)}`);
 
   const githubToken = core.getInput("github-token");
   const octokit = new github.GitHub(githubToken);
@@ -70,15 +72,12 @@ async function run() {
   );
   core.debug(`data: ${JSON.stringify(resp)}`);
 
-  const { voteChecker } = resp!;
-
   const currentIssue = {
     owner: github.context.issue.owner,
     repo: github.context.issue.repo,
     issue_number: github.context.issue.number
   };
-
-  voteChecker.repository.issues.nodes.forEach((issue: any) => {
+  resp!.repository.issues.nodes.forEach((issue: any) => {
     core.debug(`issue: ${issue.id}, ${issue.title}`);
     let count = 0;
     issue.reactions.node.forEach((reaction: any) => {
