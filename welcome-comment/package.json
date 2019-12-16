@@ -1,0 +1,21 @@
+{
+  "name": "welcome-comment",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "fmt": "prettier --write **/*.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/github": "^2.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.3"
+  }
+}

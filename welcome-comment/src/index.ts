@@ -1,0 +1,43 @@
+import * as core from "@actions/core";
+import * as github from "@actions/github";
+
+async function run() {
+  const labels = (core.getInput("labels") ?? "")
+    .split(",")
+    .map(s => s.trim())
+    .filter(s => !!s);
+  core.debug(`labels: ${JSON.stringify(labels)}`);
+
+  const githubToken = core.getInput("github-token");
+  const octokit = new github.GitHub(githubToken);
+
+  const { context } = github;
+  const issue = await octokit.issues.get(context.issue);
+
+  function matchLabel(label: string, issueLabel: typeof issue.data.labels[0]) {
+    if (`${issueLabel.id}` === label) {
+      return true;
+    } else if (issueLabel.node_id === label) {
+      return true;
+    } else if (issueLabel.name === label) {
+      return true;
+    }
+    return false;
+  }
+
+  if (
+    !labels.every(label =>
+      issue.data.labels.some(issueLabel => matchLabel(label, issueLabel))
+    )
+  ) {
+    core.debug(`some labels doesn't contains on issue labels.`);
+    return;
+  }
+
+  octokit.issues.createComment({
+    ...context.issue,
+    body: core.getInput("message")
+  });
+}
+
+run().catch(err => core.setFailed(err.message));
