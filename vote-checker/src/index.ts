@@ -55,6 +55,7 @@ async function run() {
           }
           nodes {
             id
+            number
             title
             labels(first: 10) {
               nodes {
@@ -86,11 +87,6 @@ async function run() {
   );
   core.debug(`data: ${JSON.stringify(resp)}`);
 
-  const currentIssue = {
-    owner: github.context.issue.owner,
-    repo: github.context.issue.repo,
-    issue_number: github.context.issue.number
-  };
   resp!.repository.issues.nodes.forEach((issue: any) => {
     core.debug(`issue: ${issue.id}, ${issue.title}`);
     const givenLabelsExists = givenLabels.every(givenLabel => {
@@ -101,6 +97,11 @@ async function run() {
       return;
     }
 
+    const currentIssue = {
+      owner,
+      repo,
+      issue_number: issue.number
+    };
     let count = 0;
     issue.reactions.nodes.forEach((reaction: any) => {
       core.debug(`reaction: ${reaction.id}, ${reaction.content}`);

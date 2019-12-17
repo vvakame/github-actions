@@ -7120,6 +7120,7 @@ function run() {
           }
           nodes {
             id
+            number
             title
             labels(first: 10) {
               nodes {
@@ -7148,11 +7149,6 @@ function run() {
             labels
         });
         core.debug(`data: ${JSON.stringify(resp)}`);
-        const currentIssue = {
-            owner: github.context.issue.owner,
-            repo: github.context.issue.repo,
-            issue_number: github.context.issue.number
-        };
         resp.repository.issues.nodes.forEach((issue) => {
             core.debug(`issue: ${issue.id}, ${issue.title}`);
             const givenLabelsExists = givenLabels.every(givenLabel => {
@@ -7162,6 +7158,11 @@ function run() {
                 core.debug(`given labels are already exists`);
                 return;
             }
+            const currentIssue = {
+                owner,
+                repo,
+                issue_number: issue.number
+            };
             let count = 0;
             issue.reactions.nodes.forEach((reaction) => {
                 core.debug(`reaction: ${reaction.id}, ${reaction.content}`);
